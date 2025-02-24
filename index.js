@@ -1,11 +1,18 @@
 import e from 'express';
 import cors from 'cors';
 import { faker } from '@faker-js/faker';
-require('dotenv').config();
+import { MongoClient, ServerApiVersion } from 'mongodb';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const port = process.env.PORT || 5844;
 const mongoURI = process.env.MONGO_URI;
-import { MongoClient, ServerApiVersion } from 'mongodb';
+
+if (!mongoURI) {
+  console.error('A variável de ambiente MONGO_URI não está definida.');
+  process.exit(1); // Encerra o processo se MONGO_URI não estiver definida
+}
 
 const app = e();
 
@@ -46,7 +53,8 @@ const saveRandomNames = async () => {
   }
 };
 
-setInterval(saveRandomNames, 10000); 
+// Agendar a função para rodar a cada 10 segundos
+setInterval(saveRandomNames, 10000);
 
 app.get('/', (req, res) => {
   res.send('Car Junction Backend Server Running...');
