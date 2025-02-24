@@ -7,7 +7,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const port = process.env.PORT || 5844;
-const mongoURI = process.env.MONGO_URI;
+const mongoURI = process.env.MONGODB_URI;
 
 if (!mongoURI) {
   console.error('MONGO_URI não definida!');
