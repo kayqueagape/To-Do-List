@@ -1,46 +1,57 @@
 import e from 'express';
 import cors from 'cors';
+import { faker } from '@faker-js/faker';
 require('dotenv').config();
+
 const port = process.env.PORT || 5844;
 const mongoURI = process.env.MONGO_URI;
 import { MongoClient, ServerApiVersion } from 'mongodb';
 
-//app
 const app = e();
 
-//middlewares
 app.use(e.json());
 app.use(cors());
 
-//mongo URI
 const client = new MongoClient(mongoURI, {
-    serverApi: {
-      version: ServerApiVersion.v1,
-      strict: true,
-      deprecationErrors: true,
-    },
-  });
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  },
+});
 
 const run = async () => {
-try{
+  try {
     await client.connect();
+    await client.db('admin').command({ ping: 1 });
+    console.log('Pinged your deployment. You successfully connected to MongoDB!');
+  } catch (error) {
+    console.error('Error connecting to MongoDB:', error);
+  }
+};
 
-     await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
-}
-finally{
+run().catch((error) => console.log(error));
 
-}
-}
+const saveRandomNames = async () => {
+  try {
+    const db = client.db('produtos');
+    const collection = db.collection('test');
 
-run().catch(error => console.log)
+    const randomName = faker.person.fullName();
 
-app.get('/',(req,res)=>{
-    res.send('Car Junction Backend Server Running...')
-})
+    const result = await collection.insertOne({ name: randomName });
+    console.log(`Nome salvo: ${randomName} com ID: ${result.insertedId}`);
+  } catch (error) {
+    console.error('Erro ao salvar nome no banco de dados:', error);
+  }
+};
 
-app.listen(port,()=>{
-    console.log(console.log(`Server is running on port ${port}`))
-})
+setInterval(saveRandomNames, 10000); 
+
+app.get('/', (req, res) => {
+  res.send('Car Junction Backend Server Running...');
+});
+
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
